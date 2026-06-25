@@ -198,25 +198,35 @@ let paid = JSON.parse(localStorage.getItem(LS_PAID)||'{}');
 let custom = JSON.parse(localStorage.getItem(LS_CUSTOM)||'{}');
 let tab='court', scope='ALL';
 window.LIVE = [];
+window.REG = {};   // koodi -> [{name, pts}] haettu ilmoittautuneet-sivulta
 const $=s=>document.querySelector(s);
 const savePaid=()=>localStorage.setItem(LS_PAID,JSON.stringify(paid));
 const saveCustom=()=>localStorage.setItem(LS_CUSTOM,JSON.stringify(custom));
 const num=v=>{const n=parseInt(v,10);return isNaN(n)?0:n;};
 
-/* pairs: live-derived when available, else seed; + custom */
-function livePairs(code){
-  const ms=window.LIVE.filter(m=>m._code===code);
-  if(!ms.length) return null;
-  const names=new Set();
-  ms.forEach(m=>['team_A_name','team_B_name'].forEach(k=>{ const n=m[k]; if(n && !/^(voittaja|häviäjä|sija|[A-ZÅÄÖ]{1,3}\/?(I|II|III|IV|V|VI)\b)/i.test(n)) names.add(n); }));
-  return [...names];
+const REG_URL = code => `https://beachvolley.torneopal.fi/taso/ilmoittautuneet.php?sarja=${code}&content=1`;
+
+async function loadRegs(){
+  await Promise.all(TS.map(async t => {
+    try {
+      const html = await fetch(REG_URL(t.code)).then(r=>r.text());
+      const dp = new DOMParser().parseFromString(html,'text/html');
+      const rows = [...dp.querySelectorAll('td.ilmoittautunut')];
+      const pairs = rows.map(td => {
+        const name = td.querySelector('a')?.textContent?.trim();
+        const pts = num(td.closest('tr')?.querySelector('td:last-child')?.textContent);
+        return name ? {name, pts} : null;
+      }).filter(Boolean);
+      if(pairs.length) window.REG[t.code] = pairs;
+    } catch(_){}
+  }));
 }
+
 function pairsOf(code){
-  const lp=livePairs(code);
-  const ptsMap=Object.fromEntries((SEED[code]||[]).map(p=>[p[0],p[1]]));
-  const seedNames=(SEED[code]||[]).map(p=>p[0]);
-  const baseNames = lp || seedNames;
-  const arr = baseNames.map(n=>({name:n, pts:(n in ptsMap)?ptsMap[n]:null, isNew: lp && !seedNames.includes(n)}));
+  const reg = window.REG[code];
+  const seedMap = Object.fromEntries((SEED[code]||[]).map(p=>[p[0],p[1]]));
+  const base = reg || (SEED[code]||[]).map(([name,pts])=>({name,pts}));
+  const arr = base.map(p=>({...p, isNew: reg && !(p.name in seedMap)}));
   (custom[code]||[]).forEach(n=>{ if(!arr.find(x=>x.name===n)) arr.push({name:n,pts:null,custom:true}); });
   return arr;
 }
@@ -298,14 +308,16 @@ function renderPay(){
 /* ---------- data load ---------- */
 async function loadLive(){
   try{
-    const results = await Promise.all(TS.map(t =>
-      fetch(`${HOST}?competition=${encodeURIComponent(t.code)}&date=${t.date}`)
-        .then(r=>r.json())
-        .then(j=>(j.matches||[]).map(m=>(m._code=t.code, m)))
-        .catch(()=>[])
-    ));
-    const all=[].concat(...results);
-    window.LIVE = all;   // tyhjä, jos data ei vielä julkista / ohjelmaa ei julkaistu
+    const [results] = await Promise.all([
+      Promise.all(TS.map(t =>
+        fetch(`${HOST}?competition=${encodeURIComponent(t.code)}&date=${t.date}`)
+          .then(r=>r.json())
+          .then(j=>(j.matches||[]).map(m=>(m._code=t.code, m)))
+          .catch(()=>[])
+      )),
+      loadRegs()
+    ]);
+    window.LIVE = [].concat(...results);
     $('#updated').textContent='päiv. '+new Date().toLocaleTimeString('fi-FI',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     render();
   }catch(e){ /* pidä edellinen data */ }
