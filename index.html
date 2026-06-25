@@ -193,14 +193,16 @@ const progUrl = code => `https://beachvolley.torneopal.fi/taso/sarja.php?sarja=$
 // merkinnyt kilpailun julkiseksi rajapintaan (kuten Power Cup on).
 const HOST = 'https://lentopallo-api.torneopal.net/taso/rest/getMatches';
 
-const LS_PAID='jyle_beach_paid_v1', LS_CUSTOM='jyle_beach_custom_v1';
-let paid = JSON.parse(localStorage.getItem(LS_PAID)||'{}');
+const LS_CUSTOM='jyle_beach_custom_v1';
+const FB = 'https://jyle-beach-default-rtdb.europe-west1.firebasedatabase.app';
+let paid = {};
 let custom = JSON.parse(localStorage.getItem(LS_CUSTOM)||'{}');
 let tab='court', scope='ALL';
 window.LIVE = [];
 window.REG = {};   // koodi -> [{name, pts}] haettu ilmoittautuneet-sivulta
 const $=s=>document.querySelector(s);
-const savePaid=()=>localStorage.setItem(LS_PAID,JSON.stringify(paid));
+const savePaid=()=>fetch(`${FB}/paid.json`,{method:'PUT',body:JSON.stringify(paid)}).catch(()=>{});
+const loadPaid=async()=>{ try{ const d=await fetch(`${FB}/paid.json`).then(r=>r.json()); if(d) paid=d; }catch(_){} };
 const saveCustom=()=>localStorage.setItem(LS_CUSTOM,JSON.stringify(custom));
 const num=v=>{const n=parseInt(v,10);return isNaN(n)?0:n;};
 
@@ -339,9 +341,7 @@ $('#fileImport').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ tab=t.dataset.tab; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===t)); render(); }));
 $('#tsel').addEventListener('change',e=>{ scope=e.target.value; render(); });
 
-render();
-loadLive();
-setInterval(loadLive, 10000);
+loadPaid().then(()=>{ render(); loadLive(); setInterval(loadLive, 10000); setInterval(loadPaid, 10000); });
 </script>
 </body>
 </html>
