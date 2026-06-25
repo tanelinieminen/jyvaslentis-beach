@@ -302,7 +302,7 @@ function renderPay(){
     html+=`<div class="group-h">${t.name} <span class="pill">${pd}/${n} maksanut</span><span class="ln"></span><a class="openprog" href="${progUrl(c)}" target="_blank" rel="noopener">ohjelma ↗</a></div>`;
     if(!ps.length){ html+=`<div class="empty">${n?'Ei osumia haulla.':'Ei vielä ilmoittautuneita pareja.'}</div>`; return; }
     ps.forEach(p=>{ const on=isPaid(c,p.name);
-      html+=`<div class="pair ${on?'paid':''}" data-c="${c}" data-n="${p.name.replace(/"/g,'&quot;')}"><div class="chk">✓</div><div class="nm">${p.name}${p.custom?' <small>lisätty käsin</small>':p.isNew?' <small class="new">uusi</small>':''}</div>${p.pts!=null?`<div class="pts">${p.pts} p</div>`:''}${p.custom?'<span class="seed-x" data-del="1">✕</span>':''}</div>`;
+      html+=`<div class="pair ${on?'paid':''}" data-c="${c}" data-n="${p.name.replace(/"/g,'&quot;')}"><div class="chk">✓</div><div class="nm">${p.name}${p.custom?' <small>lisätty käsin</small>':p.isNew?' <small class="new">uusi</small>':''}</div>${p.custom?'<span class="seed-x" data-del="1">✕</span>':''}</div>`;
     });
   });
   el.innerHTML=html;
