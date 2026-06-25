@@ -188,7 +188,7 @@ const SEED = {
  'P14-1':[['Schreibmaier/Sillanpää',194],['Nieminen/Sasse',89]],
  'T14-5':[['Uotila/Vierimaa',361],['Jago/Manner',235],['Henttula&Henttula (Henttula/Henttula)',182],['Lindroos/Zetterman',150],['Mäkilä/Maunu',147],['Team Ekholm (Ekholm/Ekholm)',112],['Rautiainen/Makkonen',112],['Kuronen/Ahola',108],['Sievänen/Joenniemi',100],['Vuorensyrjä/Kärkkäinen',100],['Terva-Aho/Nuija',98],['Alonen/Laakkonen',94],['Sahlberg/Väisänen',84],['Emmi&Eerika (Hokajärvi/Pasanen)',74],['Haavisto/Nieminen',60],['Peurala/Soikka',53],['Männistö/Niemelä',31],['Kallionsivu/Rajamäki',26],['Kovalainen/Orava',26],['Pieksämäen Tsemppi-82 (Eloranta/Hämäläinen)',22],['Ollila/Kaske',19],['HD (Pesonen/Pesonen)',18],['Karihtala/Härmä',8],['Jokinen/Suvanto',3],['Ploki (Marttinen/Keisanen)',0],['Tsemppi-82 (Savolainen/Pulkkinen)',0]]
 };
-const progUrl = code => `https://beachvolley.torneopal.fi/taso/sarja.php?sarja=${code}&ohjelma=1`;
+const progUrl = code => `https://tulospalvelu.beachvolley.fi/beach/tournament/${code}!beach2026/schedule`;
 // Avoin Torneopal-rajapinta (ei avainta). Beach-data näkyy kun TorneoPal/JNBV on
 // merkinnyt kilpailun julkiseksi rajapintaan (kuten Power Cup on).
 const HOST = 'https://lentopallo-api.torneopal.net/taso/rest/getMatches';
