@@ -43,10 +43,12 @@
   .tab .b{display:inline-block;background:rgba(255,255,255,.16);border-radius:999px;font-size:11px;padding:0 7px;margin-left:5px}
   .tab .b.red{background:var(--red);color:#fff}
   .tab.active .b{background:rgba(0,0,0,.18)}
-  select,input[type=search]{width:100%;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:14px;-webkit-appearance:none;appearance:none}
-  select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316a6dd' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 12px center}
-  .selrow{display:flex;gap:8px;margin-top:8px}
-  .selrow select{flex:1}
+  input[type=search]{width:100%;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:14px;-webkit-appearance:none;appearance:none}
+  .serbtns{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-top:8px}
+  .sbtn{border:1px solid var(--line);background:var(--card);color:var(--muted);padding:8px 10px;border-radius:11px;font-size:12px;font-weight:700;cursor:pointer;text-align:left;line-height:1.3}
+  .sbtn small{display:block;font-size:10px;font-weight:500;opacity:.65;margin-top:1px}
+  .sbtn.active{background:linear-gradient(180deg,var(--cyan),var(--cyan-d));color:#05283a;border-color:var(--cyan)}
+  .sbtn.active small{opacity:.75}
 
   /* court view */
   .sh{display:flex;align-items:center;gap:9px;margin:16px 2px 9px;font-size:13px;font-weight:800;letter-spacing:.3px;color:var(--muted)}
@@ -127,7 +129,7 @@
       <div class="tab active" data-tab="court">Kentät &amp; ajat<span class="b red" id="b-court" style="display:none"></span></div>
       <div class="tab" data-tab="pay">Parit &amp; maksut<span class="b" id="b-pay">0</span></div>
     </div>
-    <div class="selrow"><select id="tsel"></select></div>
+    <div class="serbtns" id="serbtns"></div>
   </div>
 
   <div id="content"></div>
@@ -242,10 +244,11 @@ const isPaid=(c,n)=>!!(paid[c]&&paid[c][n]);
 function togglePaid(c,n){ paid[c]=paid[c]||{}; if(paid[c][n]) delete paid[c][n]; else paid[c][n]=true; savePaid(); render(); }
 
 function buildSel(){
-  const opt=c=>{const t=TS.find(x=>x.code===c);const n=pairsOf(c).length;const pd=Object.keys(paid[c]||{}).length;return `<option value="${c}">${t.name} · ${t.wd} (${pd}/${n})</option>`;};
   const tot=TS.reduce((s,t)=>s+pairsOf(t.code).length,0);
-  $('#tsel').innerHTML=`<option value="ALL">Kaikki sarjat (${tot} paria)</option>`+TS.map(t=>opt(t.code)).join('');
-  $('#tsel').value=scope;
+  const allBtn=`<button class="sbtn${scope==='ALL'?' active':''}" data-code="ALL">Kaikki sarjat<small>${tot} paria</small></button>`;
+  const btns=TS.map(t=>{const n=pairsOf(t.code).length;const pd=Object.keys(paid[t.code]||{}).length;return `<button class="sbtn${scope===t.code?' active':''}" data-code="${t.code}">${t.name}<small>${t.wd} · ${pd}/${n}</small></button>`;});
+  $('#serbtns').innerHTML=allBtn+btns.join('');
+  $('#serbtns').querySelectorAll('.sbtn').forEach(b=>b.addEventListener('click',()=>{ scope=b.dataset.code; render(); }));
 }
 
 /* ---------- COURT (main) ---------- */
@@ -345,9 +348,8 @@ $('#doImport').addEventListener('click',()=>$('#fileImport').click());
 $('#fileImport').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{ try{ const d=JSON.parse(rd.result); if(d.paid){paid=d.paid;savePaid();} if(d.custom){custom=d.custom;saveCustom();} buildSel(); render(); $('#dlgSet').close(); alert('Maksut tuotu.'); }catch(_){ alert('Virheellinen tiedosto.'); } }; rd.readAsText(f); });
 
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ tab=t.dataset.tab; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===t)); render(); }));
-$('#tsel').addEventListener('change',e=>{ scope=e.target.value; render(); });
 
-loadPaid().then(()=>{ render(); loadLive(); setInterval(loadLive, 10000); setInterval(loadPaid, 10000); });
+loadPaid().then(()=>{ render(); loadLive(); setInterval(loadLive, 3600000); setInterval(loadPaid, 10000); });
 </script>
 </body>
 </html>
