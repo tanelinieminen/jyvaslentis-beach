@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JyväsLentis Beach 2026 · Turnaustyökalu</title>
+<style>
+  :root{
+    --purple:#6e3fa3; --purple-d:#4a2a73; --cyan:#16a6dd; --cyan-d:#0e7fab;
+    --sand:#f3c969; --sea:#15c0c0;
+    --bg:#10182c; --bg2:#16213c; --card:#1b2742; --card2:#22304f;
+    --line:#2e3d63; --text:#eef3fb; --muted:#9fb0d4;
+    --green:#2fd06b; --red:#ff4757; --amber:#ffb020; --live:#ff2e74;
+    --radius:16px; --shadow:0 8px 26px rgba(0,0,0,.34);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 460px at 85% -10%, rgba(243,201,105,.16) 0%, transparent 60%),
+      radial-gradient(1000px 520px at 5% 0%, rgba(22,166,221,.20) 0%, transparent 55%),
+      var(--bg) fixed;
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; padding-bottom:46px;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:0 14px}
+
+  header.top{padding:16px 6px 6px;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .logo{width:170px;max-width:50vw;height:auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))}
+  .subt{color:var(--muted);font-size:12px;margin:7px 0 0}
+  .subt b{color:var(--sand)}
+  .meta{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:9px;font-size:12px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1.6s infinite;vertical-align:middle}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+  .ibtn{background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600}
+  .ibtn:active{transform:scale(.97)}
+
+  .controls{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,var(--bg) 78%,rgba(16,24,44,0));padding:10px 0 8px}
+  .tabs{display:flex;gap:8px}
+  .tab{flex:1;border:1px solid var(--line);background:var(--card);color:var(--muted);padding:12px 10px;border-radius:13px;font-size:14px;font-weight:800;cursor:pointer;text-align:center}
+  .tab.active{background:linear-gradient(180deg,var(--cyan),var(--cyan-d));color:#05283a;border-color:var(--cyan)}
+  .tab .b{display:inline-block;background:rgba(255,255,255,.16);border-radius:999px;font-size:11px;padding:0 7px;margin-left:5px}
+  .tab .b.red{background:var(--red);color:#fff}
+  .tab.active .b{background:rgba(0,0,0,.18)}
+  select,input[type=search]{width:100%;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:14px;-webkit-appearance:none;appearance:none}
+  select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316a6dd' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 12px center}
+  .selrow{display:flex;gap:8px;margin-top:8px}
+  .selrow select{flex:1}
+
+  /* court view */
+  .sh{display:flex;align-items:center;gap:9px;margin:16px 2px 9px;font-size:13px;font-weight:800;letter-spacing:.3px;color:var(--muted)}
+  .sh.late{color:var(--red);font-size:14px} .sh.live{color:var(--live)}
+  .sh .c{background:var(--card2);border:1px solid var(--line);border-radius:999px;font-size:11px;padding:1px 8px}
+  .sh.late .c{background:var(--red);color:#fff;border-color:var(--red)}
+  .sh .ln{flex:1;height:1px;background:var(--line)}
+  .m{display:flex;gap:11px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:7px}
+  .m.late{border-color:var(--red);background:linear-gradient(90deg,rgba(255,71,87,.18),var(--card));box-shadow:0 0 0 1px rgba(255,71,87,.4)}
+  .m.live{border-color:var(--live)}
+  .m .t{font-weight:800;width:46px;flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:15px}
+  .m.late .t{color:var(--red)}
+  .m .vs{flex:1;min-width:0;font-size:15px;font-weight:600}
+  .m .vs small{display:block;color:var(--muted);font-weight:500;font-size:11px;margin-top:2px}
+  .rt{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .rt.late{background:var(--red);color:#fff;animation:blink 1.2s infinite}
+  @keyframes blink{50%{opacity:.55}}
+  .rt.livep{background:var(--live);color:#fff}
+  .rt.done{background:rgba(47,208,107,.16);color:var(--green)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .chips a{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 13px;font-size:12px;font-weight:700;color:var(--text);text-decoration:none}
+  .chips a:active{background:var(--card2)}
+  .chips a .d{color:var(--sand);font-size:10px;margin-right:5px}
+  .embed-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 2px;font-size:14px}
+  .embed-head b{font-size:15px}
+  .embed-head a{color:var(--cyan);text-decoration:none;font-weight:700;font-size:12px;white-space:nowrap}
+  iframe.prog{width:100%;height:80vh;border:1px solid var(--line);border-radius:14px;background:#fff;display:block}
+
+  /* pay view */
+  .progress{display:flex;align-items:center;gap:12px;background:linear-gradient(110deg,var(--purple),var(--cyan-d));border-radius:16px;padding:14px 16px;margin:14px 0 6px;box-shadow:var(--shadow)}
+  .progress .big{font-size:26px;font-weight:900;line-height:1}
+  .progress .lbl{font-size:12px;color:#e9e3ff;opacity:.92}
+  .bar{flex:1;height:10px;background:rgba(255,255,255,.22);border-radius:999px;overflow:hidden}
+  .bar > i{display:block;height:100%;background:var(--sand);border-radius:999px;transition:width .4s}
+  .toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .toolbar > *{flex:1;min-width:130px}
+  .group-h{display:flex;align-items:center;gap:10px;margin:18px 2px 8px;font-size:13px;font-weight:800;color:var(--muted)}
+  .group-h .pill{background:var(--card2);border:1px solid var(--line);border-radius:999px;font-size:11px;padding:2px 9px}
+  .group-h .ln{flex:1;height:1px;background:var(--line)}
+  .group-h .openprog{color:var(--cyan);text-decoration:none;font-weight:700;font-size:12px}
+  .pair{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 13px;margin-bottom:8px;cursor:pointer}
+  .pair:active{background:var(--card2)}
+  .pair.paid{background:linear-gradient(90deg,rgba(47,208,107,.14),var(--card));border-color:rgba(47,208,107,.5)}
+  .chk{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:16px;color:transparent;background:var(--bg2)}
+  .pair.paid .chk{background:var(--green);border-color:var(--green);color:#05231a}
+  .pair .nm{flex:1;font-size:15px;font-weight:600;min-width:0}
+  .pair .nm small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+  .pair .nm .new{color:var(--sand)}
+  .pair .pts{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pair .seed-x{color:var(--red);font-weight:800;padding:0 4px;font-size:18px}
+
+  .note{background:rgba(22,166,221,.08);border:1px solid var(--line);border-left:3px solid var(--cyan);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--muted);margin:14px 0}
+  .note b{color:var(--text)}
+  .empty{text-align:center;color:var(--muted);padding:24px 14px;font-size:14px;background:var(--card);border:1px dashed var(--line);border-radius:13px}
+  dialog{border:none;border-radius:16px;background:var(--bg2);color:var(--text);max-width:460px;width:92%;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  dialog::backdrop{background:rgba(0,0,0,.55)}
+  .dlg{padding:18px}
+  .dlg h3{margin:0 0 6px;font-size:17px}
+  .dlg label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+  .dlg .row{display:flex;gap:8px;margin-top:14px}
+  .dlg .row button{flex:1;border:none;border-radius:11px;padding:12px;font-size:14px;font-weight:800;cursor:pointer}
+  .btn-primary{background:var(--cyan);color:#05283a}
+  .btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)!important}
+  footer{margin-top:30px;text-align:center;font-size:11px;color:var(--muted);line-height:1.7}
+  footer a{color:var(--cyan);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <svg class="logo" viewBox="0 0 520 232" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JyväsLentis">
+      <path fill="#6e3fa3" d="M44 70 C44 40 70 26 104 26 L300 26 C440 8 470 60 470 60 L500 150 C508 196 470 210 430 210 L150 214 C70 220 30 196 34 150 Z" opacity="0.92"/>
+      <g transform="translate(372,92)"><circle r="74" fill="#fff"/><circle r="74" fill="none" stroke="#6e3fa3" stroke-width="9"/>
+        <path d="M-66 -30 C-10 -8 40 -2 70 36" fill="none" stroke="#6e3fa3" stroke-width="8"/>
+        <path d="M2 -74 C-18 -8 -20 36 12 72" fill="none" stroke="#6e3fa3" stroke-width="8"/>
+        <path d="M66 -34 C18 0 -22 18 -64 18" fill="none" stroke="#6e3fa3" stroke-width="8"/></g>
+      <text x="60" y="118" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-style="italic" fill="#16a6dd" font-size="92" stroke="#6e3fa3" stroke-width="9" style="paint-order:stroke fill">JYVÄS</text>
+      <text x="120" y="158" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-style="italic" fill="#6e3fa3" font-size="34">jyle</text>
+      <text x="190" y="208" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-style="italic" fill="#16a6dd" font-size="92" stroke="#6e3fa3" stroke-width="9" style="paint-order:stroke fill">LENTIS</text>
+    </svg>
+    <p class="subt"><b>Beach 2026 · Tuomiojärvi, Jyväskylä</b><br>JNBT 27.–28.6. · Junioreiden SM 29.6.–1.7.</p>
+    <div class="meta"><span><span class="dot"></span> <span id="updated">valmis</span></span><button class="ibtn" id="settingsBtn">⚙︎ Asetukset</button></div>
+  </header>
+
+  <div class="controls">
+    <div class="tabs">
+      <div class="tab active" data-tab="court">Kentät &amp; ajat<span class="b red" id="b-court" style="display:none"></span></div>
+      <div class="tab" data-tab="pay">Parit &amp; maksut<span class="b" id="b-pay">0</span></div>
+    </div>
+    <div class="selrow"><select id="tsel"></select></div>
+  </div>
+
+  <div id="content"></div>
+
+  <footer>
+    Kentät & ajat näyttää virallisen beach-tulospalvelun (Torneopal), joka päivittyy itsestään. Maksumerkinnät tallentuvat vain tähän selaimeen.<br>
+    <a href="https://beachvolley.torneopal.fi/" target="_blank" rel="noopener">beachvolley.torneopal.fi ↗</a>
+  </footer>
+</div>
+
+<dialog id="dlgSet"><div class="dlg">
+  <h3>Asetukset & maksujen varmuuskopiointi</h3>
+  <div class="note" style="margin:0 0 4px">Maksumerkinnät tallentuvat vain tähän selaimeen. Vie varmuuskopio talteen ja tuo se toisella laitteella tai päivityksen jälkeen.</div>
+  <div class="row"><button class="btn-ghost" id="doExport">⬇︎ Vie maksut</button><button class="btn-ghost" id="doImport">⬆︎ Tuo maksut</button><button class="btn-ghost" id="doCsv">CSV</button></div>
+  <div class="note" style="margin-top:12px"><b>Kentät & ajat</b> näyttää virallisen otteluohjelman upotettuna (päivittyy itsestään). <b>Parit & maksut</b> -lista perustuu 25.6.2026 haettuun parilistaan, jota voit täydentää "＋ Lisää pari" -toiminnolla; ajantasaiset parit näet myös upotetusta virallisesta näkymästä.</div>
+  <div class="row"><button class="btn-primary" id="setCancel">Sulje</button></div>
+  <input id="fileImport" type="file" accept="application/json" style="display:none">
+</div></dialog>
+
+<dialog id="dlgAdd"><div class="dlg">
+  <h3>Lisää pari</h3>
+  <label>Turnaus</label><select id="addT"></select>
+  <label>Parin nimi</label><input id="addName" type="text" placeholder="esim. Virtanen/Korhonen">
+  <div class="row"><button class="btn-ghost" id="addCancel">Peruuta</button><button class="btn-primary" id="addSave">Lisää</button></div>
+</div></dialog>
+
+<script>
+/* ---- salasanasuoja ---- */
+(function(){
+  const KEY='jyle_auth';
+  if(sessionStorage.getItem(KEY)==='1') return;
+  document.body.style.display='none';
+  const pw=prompt('Salasana / Password:');
+  if(pw && pw.toLowerCase()==='jyle'){ sessionStorage.setItem(KEY,'1'); document.body.style.display=''; }
+  else { document.body.innerHTML='<p style="font:16px sans-serif;text-align:center;margin-top:30vh;color:#999">Väärä salasana.</p>'; }
+})();
+/* ---- / salasanasuoja ---- */
+
+const TS = [
+  {code:'MA13', name:'JNBT miehet',            date:'2026-06-27', wd:'la 27.6.'},
+  {code:'NA13', name:'JNBT naiset',            date:'2026-06-28', wd:'su 28.6.'},
+  {code:'P18-3',name:'Pojat 18 (SM)',          date:'2026-06-29', wd:'ma 29.6.'},
+  {code:'T18-3',name:'Tytöt 18 (SM)',          date:'2026-06-29', wd:'ma 29.6.'},
+  {code:'T12-9',name:'Tytöt & Pojat 12 (SM)',  date:'2026-06-29', wd:'ma 29.6.'},
+  {code:'P16-2',name:'Pojat 16 (SM)',          date:'2026-06-30', wd:'ti 30.6.'},
+  {code:'T16-2',name:'Tytöt 16 (SM)',          date:'2026-06-30', wd:'ti 30.6.'},
+  {code:'P14-1',name:'Pojat 14 (SM)',          date:'2026-07-01', wd:'ke 1.7.'},
+  {code:'T14-5',name:'Tytöt 14 (SM)',          date:'2026-07-01', wd:'ke 1.7.'},
+];
+const SEED = {
+ 'MA13':[['Team Lintutanssi (Tuomela/Piipari)',6150],['Manninen/Perello',6141],['Niinivaara/Manninen',5308],['VeKu (Oksanen/Keinonen)',3900],['Veku (Vaittinen/Manninen)',2395],['Puolakka/Kilpinen',2290],['Linnikko/Keskinen',1950],['Oksanen/Tarvonen',1890],['Nieminen/Bär',1835],['Hirvonen/Törmälehto',1803],['vilokkinen/Lassila',1596],['Hiekka Isku-Veikot (Lassila/Mattsson)',1450],['Laine/Jokiranta',1338],['Koponen/Saloranta',1321],['Bauri Lär (Henschel/Haapakoski)',1304],['Ahola/Ropponen',998],['LeJy Oranssi (tüür/Lahtinen)',958],['Liias/Vuori',850],['Tolvanen/Kingelin',836],['Hääkiven hihalliset (Antola/Puttonen)',818],['Lammi/Hakulinen',782],['Vainio/Talasjoki',724],['Vesanen/Puhakka',698],['Järvinen/Huttunen',586],['Jkl Beach (Tarvainen/Hentinen)',332],['Matti Palonen Fanclub (Leiniö/Keminen)',138],['Paananen/Huikari',120],['Beach Kings Jyväskylä (Jääskeläinen/Lindgren)',42]],
+ 'NA13':[['Joensalo/Mämmi',5275],['Rantala/Kämppi',5175],['Ruhanen/Riihimäki',3933],['Tavaila/Niemi',3060],['Moisala/Anttonen',2918],['Törmänen/Koskelo',2745],['Kilpinen/Linnikko',2216],['Järvinen/Uusitalo',1980],['Valjakka/Isokangas',1785],['Huita/Kaarakainen',1375],['Jermoranta/Sivonen',1168],['Nurmiranta/Hakalahti',748]],
+ 'P18-3':[['vilokkinen/Lassila',1426],['Strang/Päivärinta',1205],['YNM (Niskasaari/Tihinen)',960],['Antola/Sieppi',671],['Torni & Turbo (Lindell/Heimonen)',592],['Hakala/Peippo',588],['Rapeli /Pohjolainen',455],['YNM (Vimpari/Salo)',208],['Tihinen/Louhimaa',187]],
+ 'T18-3':[['Kimpimäki/Lampinen',1084],['Joensuu/Sorvoja',1068],['Mäyrä/Kuronen',935],['Setälä/Setälä',859],['Rämö/Ryömä',810],['Varis/Jalkanen',689],['Mäenpää/Viljamaa',532],['Tolvanen/Paananen',523],['EmiRiiNuPiip (Piipponen/Nuija)',495],['Paldanius/Paloniemi',483],['Laaksi/Saraluhta',475],['Naaralainen/Välimäki',396],['Roponen/Kotivuori',352],['Himanen/Tingvall',294],['Ranne/Peräsalo',277],['Lampinen/Lampinen',185],['Tuomainen/Väänänen',91],['Viitanen/Kukka',76],['Ritola/Paananen',48]],
+ 'T12-9':[],
+ 'P16-2':[['Hakala/Peippo',588],['Ollila/Manelius',344],['Vaasa Beach Club ry (Hakamäki/Virkunen)',333],['Schreibmaier/Aro',259],['Jeskanen/Lampinen',212],['Varamäki/Ålander',203],['YNM (Niskasaari/Heikkinen)',162],['Antila/Virtala',54],['Raatikainen/Suihkonen',0]],
+ 'T16-2':[['Joensuu/Sorvoja',1068],['Rämö/Ala-Erkkilä',570],['Vuorensyrjä/Kutvonen',510],['Puuska/Vierimaa',372],['Kero/Kiviö',322],['Jago/Peltomäki',231],['Immonen/Paavola',210],['Siiki/Peräsalo',196],['Varis/Nuija',195],['Lähetkangas&Kuivasmäki (Kuivasmäki/Lähetkangas)',186],['Myllymaa/Koivisto',185],['JyLe (Suonpää/Kortteinen)',161],['Rummukainen/Nevala',145],['Haavisto/Tihinen',125],['Rautiainen/Makkonen',112],['Kuronen/Ahola',108],['Vuorensyrjä/Kärkkäinen',100],['Smirnova/Vasara',96],['Pajunen/Koivisto',85],['Pesonen/Hautala',85],['Siitonen/Kovalainen',82],['Huovinen/Ahtonen',56],['Ruokola/Lehkonen',51],['Puijo Wolley Juniorit (Ojansivu/Miettinen)',17],['Adiyaman/Lahtinen',0],['Heikkilä & Happonen (Heikkilä/Happonen)',0]],
+ 'P14-1':[['Schreibmaier/Sillanpää',194],['Nieminen/Sasse',89]],
+ 'T14-5':[['Uotila/Vierimaa',361],['Jago/Manner',235],['Henttula&Henttula (Henttula/Henttula)',182],['Lindroos/Zetterman',150],['Mäkilä/Maunu',147],['Team Ekholm (Ekholm/Ekholm)',112],['Rautiainen/Makkonen',112],['Kuronen/Ahola',108],['Sievänen/Joenniemi',100],['Vuorensyrjä/Kärkkäinen',100],['Terva-Aho/Nuija',98],['Alonen/Laakkonen',94],['Sahlberg/Väisänen',84],['Emmi&Eerika (Hokajärvi/Pasanen)',74],['Haavisto/Nieminen',60],['Peurala/Soikka',53],['Männistö/Niemelä',31],['Kallionsivu/Rajamäki',26],['Kovalainen/Orava',26],['Pieksämäen Tsemppi-82 (Eloranta/Hämäläinen)',22],['Ollila/Kaske',19],['HD (Pesonen/Pesonen)',18],['Karihtala/Härmä',8],['Jokinen/Suvanto',3],['Ploki (Marttinen/Keisanen)',0],['Tsemppi-82 (Savolainen/Pulkkinen)',0]]
+};
+const progUrl = code => `https://beachvolley.torneopal.fi/taso/sarja.php?sarja=${code}&ohjelma=1`;
+// Avoin Torneopal-rajapinta (ei avainta). Beach-data näkyy kun TorneoPal/JNBV on
+// merkinnyt kilpailun julkiseksi rajapintaan (kuten Power Cup on).
+const HOST = 'https://lentopallo-api.torneopal.net/taso/rest/getMatches';
+
+const LS_PAID='jyle_beach_paid_v1', LS_CUSTOM='jyle_beach_custom_v1';
+let paid = JSON.parse(localStorage.getItem(LS_PAID)||'{}');
+let custom = JSON.parse(localStorage.getItem(LS_CUSTOM)||'{}');
+let tab='court', scope='ALL';
+window.LIVE = [];
+const $=s=>document.querySelector(s);
+const savePaid=()=>localStorage.setItem(LS_PAID,JSON.stringify(paid));
+const saveCustom=()=>localStorage.setItem(LS_CUSTOM,JSON.stringify(custom));
+const num=v=>{const n=parseInt(v,10);return isNaN(n)?0:n;};
+
+/* pairs: live-derived when available, else seed; + custom */
+function livePairs(code){
+  const ms=window.LIVE.filter(m=>m._code===code);
+  if(!ms.length) return null;
+  const names=new Set();
+  ms.forEach(m=>['team_A_name','team_B_name'].forEach(k=>{ const n=m[k]; if(n && !/^(voittaja|häviäjä|sija|[A-ZÅÄÖ]{1,3}\/?(I|II|III|IV|V|VI)\b)/i.test(n)) names.add(n); }));
+  return [...names];
+}
+function pairsOf(code){
+  const lp=livePairs(code);
+  const ptsMap=Object.fromEntries((SEED[code]||[]).map(p=>[p[0],p[1]]));
+  const seedNames=(SEED[code]||[]).map(p=>p[0]);
+  const baseNames = lp || seedNames;
+  const arr = baseNames.map(n=>({name:n, pts:(n in ptsMap)?ptsMap[n]:null, isNew: lp && !seedNames.includes(n)}));
+  (custom[code]||[]).forEach(n=>{ if(!arr.find(x=>x.name===n)) arr.push({name:n,pts:null,custom:true}); });
+  return arr;
+}
+const isPaid=(c,n)=>!!(paid[c]&&paid[c][n]);
+function togglePaid(c,n){ paid[c]=paid[c]||{}; if(paid[c][n]) delete paid[c][n]; else paid[c][n]=true; savePaid(); render(); }
+
+function buildSel(){
+  const opt=c=>{const t=TS.find(x=>x.code===c);const n=pairsOf(c).length;const pd=Object.keys(paid[c]||{}).length;return `<option value="${c}">${t.name} · ${t.wd} (${pd}/${n})</option>`;};
+  const tot=TS.reduce((s,t)=>s+pairsOf(t.code).length,0);
+  $('#tsel').innerHTML=`<option value="ALL">Kaikki sarjat (${tot} paria)</option>`+TS.map(t=>opt(t.code)).join('');
+  $('#tsel').value=scope;
+}
+
+/* ---------- COURT (main) ---------- */
+const tval=m=>new Date(`${m.date}T${(m.time||'00:00:00')}+03:00`).getTime();
+const score=m=>`${num(m.fs_A)}–${num(m.fs_B)}`;
+const courtName=m=>m.venue_location_name||m.venue_name||('Kenttä '+(m.venue_id||'?'));
+function statusOf(m){
+  const played=(m.status||'').toLowerCase()==='played'||(m.winner_id&&m.winner_id!==''&&m.winner_id!=='0');
+  if(played) return 'done';
+  if(num(m.fs_A)+num(m.fs_B)>0 || (m.live_period&&num(m.live_period)>0)) return 'live';
+  if(Date.now()>tval(m)+5*60000) return 'late';
+  return 'upcoming';
+}
+function mrow(m){
+  const st=statusOf(m);
+  const tag = st==='late'?`<span class="rt late">MYÖHÄSSÄ</span>`:st==='live'?`<span class="rt livep">● ${score(m)}</span>`:st==='done'?`<span class="rt done">${score(m)}</span>`:'';
+  return `<div class="m ${st}"><div class="t">${(m.time||'').slice(0,5)}</div><div class="vs">${m.team_A_name||'?'} – ${m.team_B_name||'?'}<small>${courtName(m)} · ${m.category_abbrevation}</small></div>${tag}</div>`;
+}
+const byTime=(a,b)=>tval(a)-tval(b);
+function sec(title,list,cls){ if(!list.length) return ''; return `<div class="sh ${cls}">${title}<span class="c">${list.length}</span><span class="ln"></span></div>`+list.map(mrow).join(''); }
+
+function renderCourt(){
+  const el=$('#content');
+  $('#b-court').style.display='none';
+  if(scope==='ALL'){
+    el.innerHTML=`<div class="note"><b>Valitse sarja</b> nähdäksesi sen otteluohjelman: kentät, alkamisajat ja tulokset. Näkymä on virallinen tulospalvelu ja päivittyy itsestään — myöhässä olevat ja käynnissä olevat ottelut näkyvät sen tilatiedoissa. Otteluohjelma julkaistaan viimeistään turnausta edeltävänä päivänä klo 14.</div>
+      <div class="chips">${TS.map(t=>`<a href="#" data-code="${t.code}"><span class="d">${t.wd}</span>${t.name}</a>`).join('')}</div>`;
+    el.querySelectorAll('.chips a').forEach(a=>a.addEventListener('click',e=>{ e.preventDefault(); scope=a.dataset.code; $('#tsel').value=scope; render(); window.scrollTo({top:0,behavior:'smooth'}); }));
+    return;
+  }
+  const t=TS.find(x=>x.code===scope);
+  el.innerHTML=`<div class="embed-head"><div><b>${t.name}</b> · ${t.wd} · Tuomiojärvi</div><a href="${progUrl(scope)}" target="_blank" rel="noopener">Avaa uudessa välilehdessä ↗</a></div>
+    <iframe class="prog" src="${progUrl(scope)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <div class="note" style="margin-top:8px">Yllä virallinen otteluohjelma (kentät, ajat, tulokset). Jos näkymä jää tyhjäksi, avaa se napista uuteen välilehteen.</div>`;
+}
+
+/* ---------- PAY ---------- */
+function renderPay(){
+  const el=$('#content');
+  const codes = scope==='ALL'?TS.map(t=>t.code):[scope];
+  let totN=0,totP=0;
+  codes.forEach(c=>{ const ps=pairsOf(c); totN+=ps.length; totP+=ps.filter(p=>isPaid(c,p.name)).length; });
+  const pct=totN?Math.round(totP/totN*100):0;
+  let html=`<div class="progress"><div><div class="big">${totP}/${totN}</div><div class="lbl">maksanut</div></div><div class="bar"><i style="width:${pct}%"></i></div><div style="text-align:right"><div class="big">${pct}%</div><div class="lbl">valmis</div></div></div>
+    <div class="toolbar"><input type="search" id="q" placeholder="🔍 Hae paria…" value="${(window.__q||'').replace(/"/g,'&quot;')}"><button class="ibtn" id="addBtn">＋ Lisää pari</button></div>`;
+  const q=(window.__q||'').toLowerCase();
+  codes.forEach(c=>{
+    const t=TS.find(x=>x.code===c); let ps=pairsOf(c);
+    const pd=ps.filter(p=>isPaid(c,p.name)).length, n=ps.length;
+    if(q) ps=ps.filter(p=>p.name.toLowerCase().includes(q));
+    html+=`<div class="group-h">${t.name} <span class="pill">${pd}/${n} maksanut</span><span class="ln"></span><a class="openprog" href="${progUrl(c)}" target="_blank" rel="noopener">ohjelma ↗</a></div>`;
+    if(!ps.length){ html+=`<div class="empty">${n?'Ei osumia haulla.':'Ei vielä ilmoittautuneita pareja.'}</div>`; return; }
+    ps.forEach(p=>{ const on=isPaid(c,p.name);
+      html+=`<div class="pair ${on?'paid':''}" data-c="${c}" data-n="${p.name.replace(/"/g,'&quot;')}"><div class="chk">✓</div><div class="nm">${p.name}${p.custom?' <small>lisätty käsin</small>':p.isNew?' <small class="new">uusi</small>':''}</div>${p.pts!=null?`<div class="pts">${p.pts} p</div>`:''}${p.custom?'<span class="seed-x" data-del="1">✕</span>':''}</div>`;
+    });
+  });
+  el.innerHTML=html;
+  el.querySelectorAll('.pair').forEach(row=>row.addEventListener('click',e=>{
+    const c=row.dataset.c,n=row.dataset.n;
+    if(e.target.dataset.del){ if(confirm('Poistetaanko lisätty pari?')){ custom[c]=(custom[c]||[]).filter(x=>x!==n); saveCustom(); if(paid[c])delete paid[c][n]; savePaid(); buildSel(); render(); } return; }
+    togglePaid(c,n);
+  }));
+  const qi=$('#q'); if(qi) qi.addEventListener('input',()=>{ window.__q=qi.value; const p=qi.selectionStart; renderPay(); const e=$('#q'); e.focus(); e.setSelectionRange(p,p); });
+  $('#addBtn').addEventListener('click',openAdd);
+  $('#b-pay').textContent=totP;
+}
+
+/* ---------- data load ---------- */
+async function loadLive(){
+  try{
+    const results = await Promise.all(TS.map(t =>
+      fetch(`${HOST}?competition=${encodeURIComponent(t.code)}&date=${t.date}`)
+        .then(r=>r.json())
+        .then(j=>(j.matches||[]).map(m=>(m._code=t.code, m)))
+        .catch(()=>[])
+    ));
+    const all=[].concat(...results);
+    window.LIVE = all;   // tyhjä, jos data ei vielä julkista / ohjelmaa ei julkaistu
+    $('#updated').textContent='päiv. '+new Date().toLocaleTimeString('fi-FI',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    render();
+  }catch(e){ /* pidä edellinen data */ }
+}
+
+function render(){ buildSel(); if(tab==='court') renderCourt(); else renderPay(); }
+
+/* ---------- dialogs ---------- */
+function openAdd(){ $('#addT').innerHTML=TS.map(t=>`<option value="${t.code}" ${t.code===scope?'selected':''}>${t.name} · ${t.wd}</option>`).join(''); $('#addName').value=''; $('#dlgAdd').showModal(); }
+$('#addSave').addEventListener('click',()=>{ const c=$('#addT').value,n=$('#addName').value.trim(); if(n){ custom[c]=custom[c]||[]; if(!custom[c].includes(n)) custom[c].push(n); saveCustom(); buildSel(); render(); } $('#dlgAdd').close(); });
+$('#addCancel').addEventListener('click',()=>$('#dlgAdd').close());
+$('#settingsBtn').addEventListener('click',()=>$('#dlgSet').showModal());
+$('#setCancel').addEventListener('click',()=>$('#dlgSet').close());
+$('#doExport').addEventListener('click',()=>{ const b=new Blob([JSON.stringify({paid,custom},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='jyle-beach-maksut.json'; a.click(); });
+$('#doCsv').addEventListener('click',()=>{ let r=[['Turnaus','Pari','Maksanut']]; TS.forEach(t=>pairsOf(t.code).forEach(p=>r.push([t.name,p.name,isPaid(t.code,p.name)?'kyllä':'ei']))); const csv=r.map(x=>x.map(y=>`"${String(y).replace(/"/g,'""')}"`).join(';')).join('\n'); const b=new Blob(['﻿'+csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='jyle-beach-maksut.csv'; a.click(); });
+$('#doImport').addEventListener('click',()=>$('#fileImport').click());
+$('#fileImport').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{ try{ const d=JSON.parse(rd.result); if(d.paid){paid=d.paid;savePaid();} if(d.custom){custom=d.custom;saveCustom();} buildSel(); render(); $('#dlgSet').close(); alert('Maksut tuotu.'); }catch(_){ alert('Virheellinen tiedosto.'); } }; rd.readAsText(f); });
+
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ tab=t.dataset.tab; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===t)); render(); }));
+$('#tsel').addEventListener('change',e=>{ scope=e.target.value; render(); });
+
+render();
+loadLive();
+setInterval(loadLive, 60000);
+</script>
+</body>
+</html>
