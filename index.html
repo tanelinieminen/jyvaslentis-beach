@@ -349,7 +349,10 @@ $('#fileImport').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f
 
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ tab=t.dataset.tab; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===t)); render(); }));
 
-loadPaid().then(()=>{ render(); loadLive(); setInterval(loadLive, 3600000); setInterval(loadPaid, 10000); });
+loadPaid().then(()=>{ render(); loadLive();
+  setInterval(loadLive, 3600000);
+  setInterval(async ()=>{ await Promise.all([loadPaid(), loadRegs()]); if(tab==='pay') render(); }, 10000);
+});
 </script>
 </body>
 </html>
