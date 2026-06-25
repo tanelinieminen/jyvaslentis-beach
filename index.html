@@ -205,6 +205,10 @@ const savePaid=()=>fetch(`${FB}/paid.json`,{method:'PUT',body:JSON.stringify(pai
 const loadPaid=async()=>{ try{ const d=await fetch(`${FB}/paid.json`).then(r=>r.json()); if(d) paid=d; }catch(_){} };
 const saveCustom=()=>localStorage.setItem(LS_CUSTOM,JSON.stringify(custom));
 const num=v=>{const n=parseInt(v,10);return isNaN(n)?0:n;};
+const LS_KNOWN='jyle_beach_known_v1';
+let knownPairs = JSON.parse(localStorage.getItem(LS_KNOWN)||'{}'); // koodi -> Set tallennettuna arrayna
+function markKnown(code, names){ knownPairs[code]=names; localStorage.setItem(LS_KNOWN,JSON.stringify(knownPairs)); }
+function isKnown(code, name){ return !!(knownPairs[code] && knownPairs[code].includes(name)); }
 
 const REG_URL = code => `https://beachvolley.torneopal.fi/taso/ilmoittautuneet.php?sarja=${code}&content=1`;
 
@@ -219,16 +223,18 @@ async function loadRegs(){
         const pts = num(td.closest('tr')?.querySelector('td:last-child')?.textContent);
         return name ? {name, pts} : null;
       }).filter(Boolean);
-      if(pairs.length) window.REG[t.code] = pairs;
+      if(pairs.length){
+        if(!knownPairs[t.code]) markKnown(t.code, pairs.map(p=>p.name));
+        window.REG[t.code] = pairs;
+      }
     } catch(_){}
   }));
 }
 
 function pairsOf(code){
   const reg = window.REG[code];
-  const seedMap = Object.fromEntries((SEED[code]||[]).map(p=>[p[0],p[1]]));
   const base = reg || (SEED[code]||[]).map(([name,pts])=>({name,pts}));
-  const arr = base.map(p=>({...p, isNew: reg && !(p.name in seedMap)}));
+  const arr = base.map(p=>({...p, isNew: reg && !isKnown(code, p.name)}));
   (custom[code]||[]).forEach(n=>{ if(!arr.find(x=>x.name===n)) arr.push({name:n,pts:null,custom:true}); });
   return arr;
 }
